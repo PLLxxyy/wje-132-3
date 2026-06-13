@@ -1,0 +1,154 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #eef1ec;
+  color: #1d2a26;
+}
+
+.app-layout {
+  min-height: 100vh;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 88px;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+}
+
+.brand h4.ant-typography {
+  color: #f5f1e6;
+  margin: 0;
+}
+
+.brand .ant-typography {
+  color: #b8c2b8;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  background: #d3a23f;
+  color: #1a211e;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.topbar {
+  height: 88px;
+  padding: 0 28px;
+  background: #f8f6ef;
+  border-bottom: 1px solid #d9ded5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.topbar h3.ant-typography {
+  margin: 0;
+  color: #16231f;
+}
+
+.project-name {
+  color: #65746d;
+}
+
+.content {
+  padding: 24px;
+  background:
+    linear-gradient(90deg, rgb(39 76 67 / 4%) 1px, transparent 1px),
+    linear-gradient(rgb(39 76 67 / 4%) 1px, transparent 1px),
+    #eef1ec;
+  background-size: 24px 24px;
+}
+
+.page {
+  width: 100%;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.page-header h2.ant-typography {
+  margin: 0;
+  color: #17231f;
+}
+
+.ant-card {
+  border-color: #dce2d8;
+  box-shadow: none;
+}
+
+.ant-table-wrapper {
+  background: #fffefa;
+  border: 1px solid #dce2d8;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.filter-bar {
+  padding: 14px;
+  background: #fffefa;
+  border: 1px solid #dce2d8;
+  border-radius: 6px;
+}
+
+.full {
+  width: 100%;
+}
+
+.submit-row {
+  margin-top: 16px;
+}
+
+.risk-level-tag {
+  min-width: 54px;
+  text-align: center;
+  border: 0;
+  color: #fff;
+}
+
+.calendar-item {
+  display: block;
+  max-width: 120px;
+  padding: 2px 4px;
+  background: #e8efe9;
+  color: #1f6f59;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.error-boundary {
+  padding: 32px;
+}
+
+@media (max-width: 768px) {
+  .topbar {
+    height: auto;
+    padding: 16px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
