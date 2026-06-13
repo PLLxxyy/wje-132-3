@@ -15,6 +15,24 @@ export class TrainingController {
     return ok(await this.trainingService.list());
   }
 
+  @Get(trainingRoutes.anomalies)
+  async getAllAnomalies() {
+    return ok(await this.trainingService.getSignInAnomalies());
+  }
+
+  @Get(trainingRoutes.trainingAnomalies)
+  async getTrainingAnomalies(@Param('id') id: string) {
+    return ok(await this.trainingService.getSignInAnomalies(Number(id)));
+  }
+
+  @Get(trainingRoutes.export)
+  @Header('Content-Type', 'application/json; charset=utf-8')
+  async export(@Param('id') id: string, @Res() res: Response) {
+    const record = await this.trainingService.exportRecord(Number(id));
+    res.setHeader('Content-Disposition', `attachment; filename="${record.filename}"`);
+    res.end(JSON.stringify(record.content, null, 2));
+  }
+
   @Get(':id')
   async detail(@Param('id') id: string) {
     return ok(await this.trainingService.getById(Number(id)));
@@ -42,27 +60,9 @@ export class TrainingController {
     return ok(result, '签到完成');
   }
 
-  @Get(trainingRoutes.anomalies)
-  async getAllAnomalies() {
-    return ok(await this.trainingService.getSignInAnomalies());
-  }
-
-  @Get(trainingRoutes.trainingAnomalies)
-  async getTrainingAnomalies(@Param('id') id: string) {
-    return ok(await this.trainingService.getSignInAnomalies(Number(id)));
-  }
-
   @Patch(trainingRoutes.scores)
   async scores(@Param('id') id: string, @Body('scores') scores: Record<string, number>, @Req() req: RequestWithUser) {
     req.auditAction = '培训成绩录入';
     return ok(await this.trainingService.recordScores(Number(id), scores ?? {}));
-  }
-
-  @Get(trainingRoutes.export)
-  @Header('Content-Type', 'application/json; charset=utf-8')
-  async export(@Param('id') id: string, @Res() res: Response) {
-    const record = await this.trainingService.exportRecord(Number(id));
-    res.setHeader('Content-Disposition', `attachment; filename="${record.filename}"`);
-    res.end(JSON.stringify(record.content, null, 2));
   }
 }
