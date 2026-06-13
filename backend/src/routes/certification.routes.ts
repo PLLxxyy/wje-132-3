@@ -3,4 +3,5 @@ export const certificationRoutes = {
   review: ':id/review',
   renew: ':id/renew',
   expiring: 'alerts/expiring',
+  workerAnomalies: 'worker/:workerId/anomalies',
 };

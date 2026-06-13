@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { AssessmentMethod, TrainingType } from '../types/enums';
+import type { SignInAnomaly } from '../types/interfaces';
 
 @Entity('safety_training')
 export class SafetyTraining {
@@ -47,6 +48,9 @@ export class SafetyTraining {
 
   @Column({ type: 'int', default: 0 })
   passRate!: number;
+
+  @Column({ type: 'json', nullable: true })
+  signInAnomalies!: SignInAnomaly[] | null;
 
   @CreateDateColumn()
   createdAt!: Date;

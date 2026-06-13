@@ -73,6 +73,13 @@ export enum UserRole {
   Worker = 'Worker',
 }
 
+export enum CertAnomalyType {
+  NoCert = 'NoCert',
+  Expired = 'Expired',
+  ExpiringSoon = 'ExpiringSoon',
+  NotApproved = 'NotApproved',
+}
+
 export enum ErrorCode {
   Unauthorized = 'UNAUTHORIZED',
   Forbidden = 'FORBIDDEN',

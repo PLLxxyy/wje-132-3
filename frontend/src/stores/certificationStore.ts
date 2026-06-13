@@ -1,19 +1,22 @@
 import { create } from 'zustand';
 import { certificationApi } from '../api/certification';
-import type { WorkerCertification } from '../types';
+import type { SignInAnomaly, WorkerCertification } from '../types';
 import { CertStatus } from '../types/enums';
 
 interface CertificationState {
   certifications: WorkerCertification[];
   expiring: WorkerCertification[];
+  workerAnomalies: SignInAnomaly[];
   loading: boolean;
   loadCertifications: (status?: CertStatus) => Promise<void>;
   reviewCertification: (id: number, status: CertStatus, comment?: string) => Promise<void>;
+  loadWorkerAnomalies: (workerId: number) => Promise<void>;
 }
 
 export const useCertificationStore = create<CertificationState>((set) => ({
   certifications: [],
   expiring: [],
+  workerAnomalies: [],
   loading: false,
   async loadCertifications(status) {
     set({ loading: true });
@@ -34,5 +37,8 @@ export const useCertificationStore = create<CertificationState>((set) => ({
       certificationApi.expiring(),
     ]);
     set({ certifications, expiring });
+  },
+  async loadWorkerAnomalies(workerId) {
+    set({ workerAnomalies: await certificationApi.getWorkerAnomalies(workerId) });
   },
 }));

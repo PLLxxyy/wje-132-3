@@ -6,6 +6,12 @@ export const ok = <T>(data: T, message = 'success'): ApiResponse<T> => ({
   data,
 });
 
+export const warning = <T>(data: T, message = 'warning'): ApiResponse<T> => ({
+  code: 1,
+  message,
+  data,
+});
+
 export const page = <T>(
   items: T[],
   total: number,
@@ -16,5 +22,5 @@ export const page = <T>(
     items,
     total,
     page: pageNumber,
-    pageSize,
+    pageSize: pageSize,
   });

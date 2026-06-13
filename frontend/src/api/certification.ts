@@ -1,5 +1,5 @@
 import { apiPaths } from '../constants/apiPaths';
-import type { WorkerCertification } from '../types';
+import type { SignInAnomaly, WorkerCertification } from '../types';
 import { CertStatus } from '../types/enums';
 import { request, unwrap } from '../utils/request';
 
@@ -22,4 +22,6 @@ export const certificationApi = {
     unwrap<WorkerCertification>(request.patch(apiPaths.certifications.renew(id), { validUntil, photoUrl })),
   expiring: (days = 30) =>
     unwrap<WorkerCertification[]>(request.get(apiPaths.certifications.expiring, { params: { days } })),
+  getWorkerAnomalies: (workerId: number) =>
+    unwrap<SignInAnomaly[]>(request.get(apiPaths.certifications.workerAnomalies(workerId))),
 };

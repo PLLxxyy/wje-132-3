@@ -3,4 +3,6 @@ export const trainingRoutes = {
   signIn: ':id/sign-in',
   scores: ':id/scores',
   export: ':id/export',
+  anomalies: 'anomalies',
+  trainingAnomalies: ':id/anomalies',
 };

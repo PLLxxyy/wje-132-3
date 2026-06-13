@@ -22,12 +22,15 @@ export const apiPaths = {
     signIn: (id: number) => `/api/trainings/${id}/sign-in`,
     scores: (id: number) => `/api/trainings/${id}/scores`,
     export: (id: number) => `/api/trainings/${id}/export`,
+    anomalies: '/api/trainings/anomalies',
+    trainingAnomalies: (id: number) => `/api/trainings/${id}/anomalies`,
   },
   certifications: {
     base: '/api/certifications',
     review: (id: number) => `/api/certifications/${id}/review`,
     renew: (id: number) => `/api/certifications/${id}/renew`,
     expiring: '/api/certifications/alerts/expiring',
+    workerAnomalies: (workerId: number) => `/api/certifications/worker/${workerId}/anomalies`,
   },
   uploads: {
     image: '/api/uploads/image',

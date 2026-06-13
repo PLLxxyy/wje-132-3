@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Card, Drawer, Image, List, Space, Table, Typography, message } from 'antd';
+import { Button, Card, Divider, Drawer, Image, List, Space, Table, Tag, Typography, message } from 'antd';
+import { WarningOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { RiskLevelTag } from '../components/common/RiskLevelTag';
@@ -8,11 +9,38 @@ import { UserAvatar } from '../components/common/UserAvatar';
 import { useCertificationStore } from '../stores/certificationStore';
 import { useAuthStore } from '../stores/authStore';
 import { canReviewCertification } from '../types/roles';
-import { CertStatus, SeverityLevel } from '../types/enums';
-import type { WorkerCertification } from '../types';
+import { CertAnomalyType, CertStatus, SeverityLevel } from '../types/enums';
+import type { SignInAnomaly, WorkerCertification } from '../types';
+
+const getAnomalySeverity = (type: CertAnomalyType): SeverityLevel => {
+  switch (type) {
+    case CertAnomalyType.NoCert:
+      return SeverityLevel.Fatal;
+    case CertAnomalyType.Expired:
+      return SeverityLevel.Major;
+    case CertAnomalyType.NotApproved:
+      return SeverityLevel.Moderate;
+    case CertAnomalyType.ExpiringSoon:
+      return SeverityLevel.Minor;
+    default:
+      return SeverityLevel.NearMiss;
+  }
+};
+
+const getAnomalyIcon = (type: CertAnomalyType) => {
+  switch (type) {
+    case CertAnomalyType.NoCert:
+    case CertAnomalyType.Expired:
+      return <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />;
+    case CertAnomalyType.ExpiringSoon:
+      return <WarningOutlined style={{ color: '#faad14' }} />;
+    default:
+      return <WarningOutlined style={{ color: '#faad14' }} />;
+  }
+};
 
 export function CertReview() {
-  const { certifications, expiring, loading, loadCertifications, reviewCertification } = useCertificationStore();
+  const { certifications, expiring, workerAnomalies, loading, loadCertifications, reviewCertification, loadWorkerAnomalies } = useCertificationStore();
   const user = useAuthStore((state) => state.user);
   const [active, setActive] = useState<WorkerCertification>();
 
@@ -79,7 +107,17 @@ export function CertReview() {
         />
       </Card>
       <Table rowKey="id" loading={loading} columns={columns} dataSource={certifications} />
-      <Drawer title="资质详情" width={520} open={Boolean(active)} onClose={() => setActive(undefined)}>
+      <Drawer
+        title="资质详情"
+        width={620}
+        open={Boolean(active)}
+        onClose={() => setActive(undefined)}
+        afterOpenChange={(open) => {
+          if (open && active) {
+            loadWorkerAnomalies(active.workerId);
+          }
+        }}
+      >
         {active && (
           <Space direction="vertical" size={14} className="full">
             <UserAvatar userId={active.workerId} />
@@ -89,6 +127,45 @@ export function CertReview() {
             <Typography.Text>有效期至：{active.validUntil}</Typography.Text>
             <StatusBadge status={active.auditStatus} />
             {active.photoUrl ? <Image src={active.photoUrl} alt="证书照片" /> : <Card>暂无证书照片</Card>}
+
+            <Divider />
+            <Typography.Title level={5}>签到异常记录</Typography.Title>
+            {workerAnomalies.length > 0 ? (
+              <List
+                dataSource={workerAnomalies}
+                renderItem={(anomaly: SignInAnomaly) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      avatar={getAnomalyIcon(anomaly.anomalyType)}
+                      title={
+                        <Space>
+                          <Tag color="blue">培训 #{anomaly.trainingId}</Tag>
+                          <RiskLevelTag level={getAnomalySeverity(anomaly.anomalyType)} />
+                        </Space>
+                      }
+                      description={
+                        <Space direction="vertical" size={4}>
+                          <Typography.Text>{anomaly.message}</Typography.Text>
+                          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                            检测时间：{anomaly.detectedAt}
+                          </Typography.Text>
+                          {anomaly.certType && (
+                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                              资质类型：{anomaly.certType}
+                              {anomaly.validUntil && `，有效期至：${anomaly.validUntil}`}
+                              {typeof anomaly.daysRemaining === 'number' &&
+                                `，剩余 ${anomaly.daysRemaining} 天`}
+                            </Typography.Text>
+                          )}
+                        </Space>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <Typography.Text type="secondary">暂无签到异常记录</Typography.Text>
+            )}
           </Space>
         )}
       </Drawer>

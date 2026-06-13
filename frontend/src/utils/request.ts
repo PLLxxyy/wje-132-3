@@ -15,7 +15,13 @@ request.interceptors.request.use((config) => {
 });
 
 request.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const data = response.data as ApiResponse<unknown>;
+    if (data && data.code === 1 && data.message) {
+      message.warning(data.message);
+    }
+    return response;
+  },
   (error: AxiosError<ApiResponse<null>>) => {
     const text = error.response?.data?.message ?? error.message ?? '请求失败';
     message.error(text);

@@ -1,16 +1,19 @@
 import { create } from 'zustand';
 import { trainingApi } from '../api/training';
-import type { SafetyTraining } from '../types';
+import type { SafetyTraining, SignInAnomaly, SignInResult } from '../types';
 
 interface TrainingState {
   trainings: SafetyTraining[];
+  anomalies: SignInAnomaly[];
   loading: boolean;
   loadTrainings: () => Promise<void>;
-  signIn: (id: number, workerId: number) => Promise<void>;
+  signIn: (id: number, workerId: number) => Promise<SignInResult>;
+  loadAnomalies: () => Promise<void>;
 }
 
 export const useTrainingStore = create<TrainingState>((set) => ({
   trainings: [],
+  anomalies: [],
   loading: false,
   async loadTrainings() {
     set({ loading: true });
@@ -21,7 +24,11 @@ export const useTrainingStore = create<TrainingState>((set) => ({
     }
   },
   async signIn(id, workerId) {
-    await trainingApi.signIn(id, workerId);
+    const result = await trainingApi.signIn(id, workerId);
     set({ trainings: await trainingApi.list() });
+    return result;
+  },
+  async loadAnomalies() {
+    set({ anomalies: await trainingApi.getAnomalies() });
   },
 }));

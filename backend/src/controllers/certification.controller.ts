@@ -61,4 +61,9 @@ export class CertificationController {
     req.auditAction = '资质续期';
     return ok(await this.certificationService.renew(Number(id), body.validUntil, body.photoUrl));
   }
+
+  @Get(certificationRoutes.workerAnomalies)
+  async getWorkerAnomalies(@Param('workerId') workerId: string) {
+    return ok(await this.certificationService.getWorkerSignInAnomalies(Number(workerId)));
+  }
 }

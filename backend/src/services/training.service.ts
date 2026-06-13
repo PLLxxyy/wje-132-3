@@ -2,12 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SafetyTraining } from '../models/training.entity';
+import { CertificationService } from './certification.service';
+import type { CertStatusCheckResult, SignInAnomaly } from '../types/interfaces';
 
 @Injectable()
 export class TrainingService {
   constructor(
     @InjectRepository(SafetyTraining)
     private readonly trainingRepository: Repository<SafetyTraining>,
+    private readonly certificationService: CertificationService,
   ) {}
 
   async list() {
@@ -28,14 +31,38 @@ export class TrainingService {
         signedInIds: payload.signedInIds ?? [],
         scores: payload.scores ?? {},
         passRate: payload.passRate ?? 0,
+        signInAnomalies: payload.signInAnomalies ?? [],
       }),
     );
   }
 
-  async signIn(id: number, workerId: number) {
+  async signIn(id: number, workerId: number): Promise<{ training: SafetyTraining; certCheck: CertStatusCheckResult }> {
     const training = await this.getById(id);
+    const certCheck = await this.certificationService.checkWorkerCertStatus(workerId, id);
+
+    if (certCheck.anomalies.length > 0) {
+      training.signInAnomalies = [...(training.signInAnomalies ?? []), ...certCheck.anomalies];
+    }
+
     training.signedInIds = Array.from(new Set([...(training.signedInIds ?? []), workerId]));
-    return this.trainingRepository.save(training);
+    const savedTraining = await this.trainingRepository.save(training);
+
+    return { training: savedTraining, certCheck };
+  }
+
+  async getSignInAnomalies(trainingId?: number): Promise<SignInAnomaly[]> {
+    if (trainingId) {
+      const training = await this.getById(trainingId);
+      return training.signInAnomalies ?? [];
+    }
+    const trainings = await this.list();
+    const allAnomalies: SignInAnomaly[] = [];
+    for (const training of trainings) {
+      if (training.signInAnomalies) {
+        allAnomalies.push(...training.signInAnomalies);
+      }
+    }
+    return allAnomalies.sort((a, b) => new Date(b.detectedAt).getTime() - new Date(a.detectedAt).getTime());
   }
 
   async recordScores(id: number, scores: Record<string, number>) {

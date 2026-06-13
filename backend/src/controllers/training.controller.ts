@@ -2,8 +2,9 @@ import { Body, Controller, Get, Header, Param, Patch, Post, Req, Res } from '@ne
 import { Response } from 'express';
 import { trainingRoutes } from '../routes/training.routes';
 import { TrainingService } from '../services/training.service';
+import { CertAnomalyType } from '../types/enums';
 import { RequestWithUser } from '../types/interfaces';
-import { ok } from '../utils/response';
+import { ok, warning } from '../utils/response';
 
 @Controller(trainingRoutes.base)
 export class TrainingController {
@@ -28,7 +29,27 @@ export class TrainingController {
   @Patch(trainingRoutes.signIn)
   async signIn(@Param('id') id: string, @Body('workerId') workerId: number, @Req() req: RequestWithUser) {
     req.auditAction = '培训签到';
-    return ok(await this.trainingService.signIn(Number(id), workerId ?? req.user?.id ?? 1));
+    const result = await this.trainingService.signIn(Number(id), workerId ?? req.user?.id ?? 1);
+    const hasBlockingAnomaly = result.certCheck.anomalies.some(
+      (a) => a.anomalyType === CertAnomalyType.NoCert || a.anomalyType === CertAnomalyType.Expired,
+    );
+    if (hasBlockingAnomaly) {
+      return warning(result, '签到完成，但检测到资质异常，请关注');
+    }
+    if (result.certCheck.anomalies.length > 0) {
+      return warning(result, '签到完成，但部分资质即将过期');
+    }
+    return ok(result, '签到完成');
+  }
+
+  @Get(trainingRoutes.anomalies)
+  async getAllAnomalies() {
+    return ok(await this.trainingService.getSignInAnomalies());
+  }
+
+  @Get(trainingRoutes.trainingAnomalies)
+  async getTrainingAnomalies(@Param('id') id: string) {
+    return ok(await this.trainingService.getSignInAnomalies(Number(id)));
   }
 
   @Patch(trainingRoutes.scores)
